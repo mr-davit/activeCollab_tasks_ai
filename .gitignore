@@ -1,0 +1,41 @@
+# Dependencies
+node_modules/
+
+# Build output
+dist/
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+npm-debug.log*
+
+# Test coverage
+coverage/
+
+# Temporary files
+tmp/
+temp/
+
+# Project-specific config (contains project_id)
+.ac-task.json
+
+# Generated AI context files (user-specific data)
+.ai/ACTIVE_COLLAB_PROJECT_GUIDE.md
+.ai/AC_TASK_AGENT_INSTRUCTIONS.md
+
+# NPM pack artifacts
+*.tgz

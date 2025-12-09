@@ -1,0 +1,42 @@
+{
+    "name": "activecollab-task-cli",
+    "version": "0.1.0",
+    "description": "CLI tool for ActiveCollab task management - AI-ready with LLM context generation",
+    "main": "dist/index.js",
+    "bin": {
+        "ac-task": "./bin/ac-task.js"
+    },
+    "files": [
+        "dist",
+        "bin",
+        "README.md"
+    ],
+    "scripts": {
+        "build": "tsc",
+        "dev": "tsc --watch",
+        "start": "node dist/index.js",
+        "lint": "eslint src/**/*.ts",
+        "prepublishOnly": "npm run build"
+    },
+    "keywords": [
+        "activecollab",
+        "cli",
+        "tasks"
+    ],
+    "author": "",
+    "license": "MIT",
+    "dependencies": {
+        "@inquirer/prompts": "^7.2.0",
+        "axios": "^1.6.2",
+        "chalk": "^4.1.2",
+        "commander": "^11.1.0",
+        "dotenv": "^16.3.1"
+    },
+    "devDependencies": {
+        "@types/node": "^20.10.4",
+        "typescript": "^5.3.3"
+    },
+    "engines": {
+        "node": ">=18"
+    }
+}
