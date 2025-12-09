@@ -1,6 +1,6 @@
 {
   "name": "@mr-davit/activecollab-task-cli",
-  "version": "0.1.1",
+  "version": "1.0.1",
   "description": "CLI tool for ActiveCollab task management - AI-ready with LLM context generation",
   "main": "dist/index.js",
   "bin": {
@@ -9,7 +9,8 @@
   "files": [
     "dist",
     "bin",
-    "README.md"
+    "README.md",
+    "LICENSE"
   ],
   "scripts": {
     "build": "tsc",
@@ -21,10 +22,21 @@
   "keywords": [
     "activecollab",
     "cli",
-    "tasks"
+    "ai-agent",
+    "productivity",
+    "typescript",
+    "copilot"
   ],
-  "author": "",
+  "author": "Daviti",
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/mr-davit/activecollab-task-cli.git"
+  },
+  "bugs": {
+    "url": "https://github.com/mr-davit/activecollab-task-cli/issues"
+  },
+  "homepage": "https://github.com/mr-davit/activecollab-task-cli#readme",
   "dependencies": {
     "@inquirer/prompts": "^7.2.0",
     "axios": "^1.6.2",
