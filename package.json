@@ -4,7 +4,7 @@
   "description": "CLI tool for ActiveCollab task management - AI-ready with LLM context generation",
   "main": "dist/index.js",
   "bin": {
-    "ac-task": "./bin/ac-task.js"
+    "ac-task": "bin/ac-task.js"
   },
   "files": [
     "dist",
