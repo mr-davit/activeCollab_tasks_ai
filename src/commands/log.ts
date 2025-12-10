@@ -1,4 +1,4 @@
-/**
+0/**
  * Log command for ac-task CLI
  * 
  * Logs time spent on a task.

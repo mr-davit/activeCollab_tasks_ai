@@ -12,11 +12,21 @@ let clientInstance: AxiosInstance | null = null;
 /** Global flag to allow insecure TLS (expired/self-signed certs) */
 let allowInsecure = false;
 
+/** Global flag to enable verbose HTTP logging */
+let verboseLogging = false;
+
 /**
  * Set whether to allow insecure TLS connections
  */
 export function setInsecure(insecure: boolean): void {
     allowInsecure = insecure;
+}
+
+/**
+ * Enable or disable verbose HTTP logging
+ */
+export function setVerbose(verbose: boolean): void {
+    verboseLogging = verbose;
 }
 
 /**
@@ -76,6 +86,13 @@ export function createClient(baseUrl?: string, token?: string, insecure?: boolea
     // Request interceptor for logging/debugging (if needed later)
     client.interceptors.request.use(
         (config: InternalAxiosRequestConfig) => {
+            if (verboseLogging) {
+                console.error('[HTTP Request]');
+                console.error(`  ${config.method?.toUpperCase()} ${config.baseURL}${config.url}`);
+                if (config.data) {
+                    console.error('  Body:', JSON.stringify(config.data, null, 2));
+                }
+            }
             return config;
         },
         (error: AxiosError) => {
@@ -85,8 +102,20 @@ export function createClient(baseUrl?: string, token?: string, insecure?: boolea
 
     // Response interceptor to transform errors
     client.interceptors.response.use(
-        (response) => response,
+        (response) => {
+            if (verboseLogging) {
+                console.error('[HTTP Response]');
+                console.error(`  Status: ${response.status} ${response.statusText}`);
+                console.error('  Data:', JSON.stringify(response.data, null, 2));
+            }
+            return response;
+        },
         (error: AxiosError) => {
+            if (verboseLogging && error.response) {
+                console.error('[HTTP Error Response]');
+                console.error(`  Status: ${error.response.status} ${error.response.statusText}`);
+                console.error('  Data:', JSON.stringify(error.response.data, null, 2));
+            }
             // Transform Axios errors to ACTaskError for consistent handling
             throw fromAxiosError(error);
         }

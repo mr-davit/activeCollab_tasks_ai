@@ -238,7 +238,7 @@ async function initHandler(options: { format?: string; project?: string }): Prom
         // If there's no global config, ask the user to provide base URL and token env var
         if (!globalConfig) {
             if (format === 'human') {
-                console.log(info('No global configuration found.')); 
+                console.log(info('No global configuration found.'));
             }
 
             const setupNow = await input({

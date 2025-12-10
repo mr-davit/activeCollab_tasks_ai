@@ -21,6 +21,7 @@ import { registerDeleteCommand } from './commands/delete';
 import { registerCommentCommand } from './commands/comment';
 import { registerLogCommand } from './commands/log';
 import { handleError } from './utils/errorHandler';
+import { setVerbose } from './api/client';
 
 // Load environment variables from .env file if present
 dotenv.config();
@@ -37,7 +38,16 @@ function createProgram(): Command {
     program
         .name('ac-task')
         .description('CLI tool for ActiveCollab task management')
-        .version(getVersion());
+        .version(getVersion())
+        .option('--verbose', 'Enable verbose HTTP request/response logging');
+
+    // Hook to enable verbose logging before commands execute
+    program.hook('preAction', (thisCommand) => {
+        const opts = thisCommand.opts();
+        if (opts.verbose) {
+            setVerbose(true);
+        }
+    });
 
     // Register command modules
     registerVersionCommand(program);
