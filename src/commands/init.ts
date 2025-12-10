@@ -13,7 +13,7 @@ import * as fs from 'fs';
 import * as path from 'path';
 import chalk from 'chalk';
 import { OutputFormat, ProjectConfig, ACProject, ACUser, ACTaskList } from '../types';
-import { loadGlobalConfig, requireGlobalConfig } from '../config/loader';
+import { loadGlobalConfig, requireGlobalConfig, saveGlobalConfig } from '../config/loader';
 import { getProjectRoot, PROJECT_CONFIG_FILENAME } from '../config/paths';
 import { fetchProject, fetchProjectUsers, fetchTaskLists } from '../api/utils';
 import { getClient } from '../api/client';
@@ -232,8 +232,87 @@ async function initHandler(options: { format?: string; project?: string }): Prom
     const format = getFormat(options);
 
     try {
-        // Require global config (auth must be done first)
-        const globalConfig = requireGlobalConfig();
+        // Load global config (auth may not be configured)
+        let globalConfig = loadGlobalConfig();
+
+        // If there's no global config, ask the user to provide base URL and token env var
+        if (!globalConfig) {
+            if (format === 'human') {
+                console.log(info('No global configuration found.')); 
+            }
+
+            const setupNow = await input({
+                message: 'No global config found. Do you want to provide ActiveCollab URL and token now? (y/n)',
+                default: 'y',
+                validate: (v) => (v === 'y' || v === 'n' || v === 'Y' || v === 'N') ? true : 'Enter y or n',
+            });
+
+            if (setupNow.toLowerCase() === 'y') {
+                const baseUrl = await input({
+                    message: 'Enter your ActiveCollab instance URL:',
+                    validate: (value) => {
+                        if (!value.trim()) return 'URL is required';
+                        try { new URL(value); return true; } catch { return 'Please enter a valid URL'; }
+                    }
+                });
+
+                const tokenEnvVar = await input({
+                    message: 'Enter environment variable name that will hold your API token:',
+                    default: 'AC_API_TOKEN',
+                    validate: (v) => v.trim() ? true : 'Required',
+                });
+
+                // Optionally save global config
+                const saveCfg = await input({
+                    message: 'Save this configuration to ~/.ac-task/config.json? (y/n)',
+                    default: 'y',
+                    validate: (v) => (v === 'y' || v === 'n') ? true : 'Enter y or n',
+                });
+
+                globalConfig = {
+                    base_url: baseUrl.trim(),
+                    token_env_var: tokenEnvVar.trim(),
+                    cached_user_id: 0,
+                    cached_user_name: '',
+                } as any;
+
+                if (saveCfg.toLowerCase() === 'y') {
+                    try {
+                        saveGlobalConfig(globalConfig as any);
+                        if (format === 'human') console.log(success('Saved global configuration.'));
+                    } catch (err) {
+                        if (format === 'human') console.log(warning('Failed to save global configuration. Proceeding with in-memory config.'));
+                    }
+                }
+            } else {
+                throw new ACTaskError(
+                    'CONFIGURATION_ERROR',
+                    'Global configuration not found',
+                    1,
+                    'Run "ac-task auth setup" to configure your ActiveCollab connection.'
+                );
+            }
+        }
+
+        // If token env var is not set, prompt for token to use for this session
+        if (globalConfig && !process.env[globalConfig.token_env_var]) {
+            if (format === 'human') {
+                console.log(warning(`Environment variable "${globalConfig.token_env_var}" is not set.`));
+            }
+            const provideToken = await input({
+                message: `Enter your ActiveCollab API token to use for this session (will not be saved):`,
+            });
+            if (provideToken && provideToken.trim()) {
+                process.env[globalConfig.token_env_var] = provideToken.trim();
+            } else {
+                throw new ACTaskError(
+                    'CONFIGURATION_ERROR',
+                    `Environment variable "${globalConfig.token_env_var}" is not set`,
+                    1,
+                    `Set the environment variable with your ActiveCollab API token: export ${globalConfig.token_env_var}=your_token`
+                );
+            }
+        }
 
         // Determine target directory (cwd or existing project root)
         let targetDir = process.cwd();
@@ -312,7 +391,10 @@ async function initHandler(options: { format?: string; project?: string }): Prom
         saveProjectConfig(projectId, targetDir);
 
         // Generate and save guide
-        const guideContent = generateProjectGuide(project, users, taskLists, globalConfig);
+        // At this point globalConfig is guaranteed to be set (we validated earlier),
+        // but narrow the type for TypeScript.
+        const gc = globalConfig as { cached_user_id: number; cached_user_name: string; base_url: string };
+        const guideContent = generateProjectGuide(project, users, taskLists, gc);
         saveProjectGuide(guideContent, targetDir);
 
         // Save static agent instructions
