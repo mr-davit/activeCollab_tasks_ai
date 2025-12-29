@@ -65,7 +65,7 @@ export function createClient(baseUrl?: string, token?: string, insecure?: boolea
             'CONFIGURATION_ERROR',
             'API token not available',
             1,
-            'Ensure the API token environment variable is set.'
+            'Run "ac-task auth:setup" to configure your ActiveCollab API token.'
         );
     }
 

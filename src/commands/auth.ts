@@ -98,31 +98,16 @@ async function setupHandler(options: { format?: string; insecure?: boolean }): P
             },
         });
 
-        // Prompt for environment variable name
-        const tokenEnvVar = await input({
-            message: 'Enter the name of the environment variable holding your API token:',
-            default: 'AC_API_TOKEN',
+        // Prompt for API token directly
+        const token = await input({
+            message: 'Enter your ActiveCollab API token:',
             validate: (value) => {
                 if (!value.trim()) {
-                    return 'Environment variable name is required';
-                }
-                if (!/^[A-Z_][A-Z0-9_]*$/i.test(value)) {
-                    return 'Please enter a valid environment variable name';
+                    return 'API token is required';
                 }
                 return true;
             },
         });
-
-        // Check if the environment variable is set
-        const token = process.env[tokenEnvVar];
-        if (!token) {
-            throw new ACTaskError(
-                'CONFIGURATION_ERROR',
-                `Environment variable "${tokenEnvVar}" is not set`,
-                1,
-                `Please set the environment variable before running setup:\n  export ${tokenEnvVar}=your_api_token`
-            );
-        }
 
         // Verify connection (with SSL error handling)
         if (format === 'human') {
@@ -165,7 +150,7 @@ async function setupHandler(options: { format?: string; insecure?: boolean }): P
         // Save configuration (including force_unsafe_ssl if set)
         const config: GlobalConfig = {
             base_url: baseUrl.trim(),
-            token_env_var: tokenEnvVar,
+            token: token.trim(),
             cached_user_id: user.id,
             cached_user_name: user.display_name,
             ...(forceUnsafeSsl && { force_unsafe_ssl: true }),

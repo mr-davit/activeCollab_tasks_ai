@@ -1,6 +1,6 @@
 {
     "name": "@mr-davit/activecollab-task-cli",
-    "version": "1.0.2",
+    "version": "1.1.0",
     "description": "CLI tool for ActiveCollab task management - AI-ready with LLM context generation",
     "main": "dist/index.js",
     "bin": {

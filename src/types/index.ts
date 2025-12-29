@@ -14,7 +14,10 @@ export * from './activecollab';
  */
 export interface GlobalConfig {
     base_url: string;
-    token_env_var: string;
+    /** Name of environment variable holding the token (for backward compatibility) */
+    token_env_var?: string;
+    /** API token stored directly in config (preferred method) */
+    token?: string;
     cached_user_id: number;
     cached_user_name: string;
     /** If true, skip TLS certificate validation (for self-signed/expired certs) */

@@ -110,18 +110,34 @@ export function getApiToken(globalConfig?: GlobalConfig | null): string {
         );
     }
 
-    const token = process.env[config.token_env_var];
-
-    if (!token) {
-        throw new ACTaskError(
-            'CONFIGURATION_ERROR',
-            `Environment variable "${config.token_env_var}" is not set`,
-            1,
-            `Set the environment variable with your ActiveCollab API token: export ${config.token_env_var}=your_token`
-        );
+    // First, try to get token directly from config (preferred method)
+    if (config.token) {
+        return config.token;
     }
 
-    return token;
+    // Fall back to environment variable (for backward compatibility)
+    if (config.token_env_var) {
+        const token = process.env[config.token_env_var];
+
+        if (!token) {
+            throw new ACTaskError(
+                'CONFIGURATION_ERROR',
+                `Environment variable "${config.token_env_var}" is not set`,
+                1,
+                `Set the environment variable with your ActiveCollab API token: export ${config.token_env_var}=your_token`
+            );
+        }
+
+        return token;
+    }
+
+    // Neither token nor token_env_var is set
+    throw new ACTaskError(
+        'CONFIGURATION_ERROR',
+        'No API token configured',
+        1,
+        'Run "ac-task auth:setup" to configure your ActiveCollab API token.'
+    );
 }
 
 /**

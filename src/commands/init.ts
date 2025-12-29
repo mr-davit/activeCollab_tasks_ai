@@ -256,10 +256,9 @@ async function initHandler(options: { format?: string; project?: string }): Prom
                     }
                 });
 
-                const tokenEnvVar = await input({
-                    message: 'Enter environment variable name that will hold your API token:',
-                    default: 'AC_API_TOKEN',
-                    validate: (v) => v.trim() ? true : 'Required',
+                const apiToken = await input({
+                    message: 'Enter your ActiveCollab API token:',
+                    validate: (v) => v.trim() ? true : 'API token is required',
                 });
 
                 // Optionally save global config
@@ -271,7 +270,7 @@ async function initHandler(options: { format?: string; project?: string }): Prom
 
                 globalConfig = {
                     base_url: baseUrl.trim(),
-                    token_env_var: tokenEnvVar.trim(),
+                    token: apiToken.trim(),
                     cached_user_id: 0,
                     cached_user_name: '',
                 } as any;
@@ -294,25 +293,8 @@ async function initHandler(options: { format?: string; project?: string }): Prom
             }
         }
 
-        // If token env var is not set, prompt for token to use for this session
-        if (globalConfig && !process.env[globalConfig.token_env_var]) {
-            if (format === 'human') {
-                console.log(warning(`Environment variable "${globalConfig.token_env_var}" is not set.`));
-            }
-            const provideToken = await input({
-                message: `Enter your ActiveCollab API token to use for this session (will not be saved):`,
-            });
-            if (provideToken && provideToken.trim()) {
-                process.env[globalConfig.token_env_var] = provideToken.trim();
-            } else {
-                throw new ACTaskError(
-                    'CONFIGURATION_ERROR',
-                    `Environment variable "${globalConfig.token_env_var}" is not set`,
-                    1,
-                    `Set the environment variable with your ActiveCollab API token: export ${globalConfig.token_env_var}=your_token`
-                );
-            }
-        }
+        // Token is now stored directly in config, so no need for env var fallback
+        // The getApiToken() function in config/loader.ts will handle token retrieval
 
         // Determine target directory (cwd or existing project root)
         let targetDir = process.cwd();

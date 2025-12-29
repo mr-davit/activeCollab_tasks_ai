@@ -37,15 +37,21 @@ npx ac-task init
 
 ---
 
-## Set your API token (env var)
+## Authentication (`ac-task auth:setup`)
 
-Set the environment variable that stores your ActiveCollab API token:
+Before using the CLI, you need to configure your ActiveCollab connection:
 
 ```bash
-export AC_API_TOKEN=your_activecollab_api_token_here
+ac-task auth:setup
 ```
 
-This CLI reads the variable named in your global config (default `AC_API_TOKEN`). The token value itself is not written to disk by default.
+This will prompt you for:
+1. Your ActiveCollab instance URL (e.g., `https://app.activecollab.com/123456`)
+2. Your ActiveCollab API token
+
+The token is securely stored in `~/.ac-task/config.json` and will be used for all subsequent commands.
+
+**Note:** For backward compatibility, the CLI also supports reading tokens from environment variables if `token_env_var` is configured in your config file.
 
 ---
 
@@ -57,9 +63,8 @@ This CLI reads the variable named in your global config (default `AC_API_TOKEN`)
 Init flow (what to expect):
 
 1. If you have not configured global auth (`~/.ac-task/config.json`), `init` will prompt whether you want to provide the ActiveCollab URL and token now. You can choose to save this config to `~/.ac-task/config.json` or use the values for this session only.
-2. If your token environment variable (e.g. `AC_API_TOKEN`) is not set, `init` will ask you to provide the token for this session.
-3. `init` will then prompt for the ActiveCollab *Project ID* (or accept `--project <id>`).
-4. The CLI fetches project details, users and task lists, writes `.ac-task.json`, and the `.ai` context files.
+2. `init` will then prompt for the ActiveCollab *Project ID* (or accept `--project <id>`).
+3. The CLI fetches project details, users and task lists, writes `.ac-task.json`, and the `.ai` context files.
 
 URL examples and guidance
 
@@ -68,18 +73,21 @@ URL examples and guidance
 
 	The CLI will normalize the URL when building browser links (it strips a trailing `/api/v1` or `/api/v2` to produce a user-facing project URL like `https://project.yourproject.com/projects/3`).
 
-Security notes
+Security notes:
+- Your API token is stored in `~/.ac-task/config.json` (not committed to git)
+- Ensure this file has appropriate permissions (the CLI creates it with user-only read/write by default)
 
 Example: full interactive setup
 
 ```bash
-# set token in this shell (recommended)
-export AC_API_TOKEN=4-Gojxt...yourtoken
+# First-time setup
+ac-task auth:setup
+# Enter your ActiveCollab URL and API token when prompted
 
 # initialize in repo
 cd /path/to/repo
 ac-task init
-# follow prompts: provide project id (or use --project), optionally save global config
+# follow prompts: provide project id (or use --project)
 ```
 
 
